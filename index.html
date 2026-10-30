@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusPlay - Volvamos a jugar en la Universidad</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0b1120',
+                            navy: '#1e293b',
+                            blue: '#2563eb',
+                            cyan: '#06b6d4',
+                            emerald: '#10b981',
+                            accent: '#f59e0b'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(11, 17, 32, 0.95)), 
+                        url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1920&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        
+        /* Frosted Glass Cards */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        
+        .sport-card-overlay {
+            background: linear-gradient(180deg, rgba(15,23,42,0.2) 0%, rgba(15,23,42,0.95) 100%);
+        }
+    </style>
+</head>
+<body class="h-full text-slate-100 flex flex-col justify-between antialiased selection:bg-cyan-500 selection:text-white min-h-screen">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-md border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Logo & Brand -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchView('app')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-cyan-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                    <i class="fa-solid fa-futbol text-white text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-cyan-400 bg-clip-text text-transparent">CampusPlay</span>
+                    <span class="hidden sm:inline-block text-xs bg-cyan-950 text-cyan-400 border border-cyan-800/50 px-2 py-0.5 rounded-full ml-2 font-mono">MVP v1.0</span>
+                </div>
+            </div>
+
+            <!-- Header Actions with Admin Access Pin Lock -->
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <button onclick="requestAdminAuth('test')" class="flex items-center space-x-2 text-xs sm:text-sm bg-slate-900/90 hover:bg-slate-800 text-cyan-400 font-medium px-3 py-2 rounded-xl border border-cyan-500/30 transition-all shadow-sm">
+                    <i class="fa-solid fa-lock text-amber-400"></i>
+                    <span class="hidden md:inline">Matriz de resultados</span>
+                    <span class="md:hidden">Pruebas</span>
+                    <span id="testCounterBadge" class="bg-cyan-500 text-slate-950 text-xs font-bold px-1.5 py-0.5 rounded-full ml-1">0</span>
+                </button>
+                <button onclick="requestAdminAuth('registrations')" class="flex items-center space-x-2 text-xs sm:text-sm bg-blue-600 hover:bg-blue-500 text-white font-medium px-3 py-2 rounded-xl transition-all shadow-lg shadow-blue-600/30">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span class="hidden sm:inline">Ver Resultados (Admin)</span>
+                    <span id="userRegistrationsCount" class="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full ml-1">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- Hero Banner with Dynamic Sports Imagery -->
+        <div class="relative overflow-hidden rounded-3xl bg-slate-950/80 border border-slate-700/60 p-6 sm:p-10 shadow-2xl mb-8">
+            <div class="absolute inset-0 z-0 opacity-30 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=1200&auto=format&fit=crop');"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-transparent z-0"></div>
+
+            <div class="relative z-10 max-w-2xl">
+                <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 text-xs font-bold mb-4 shadow-lg backdrop-blur-md">
+                    <i class="fa-solid fa-graduation-cap text-cyan-400"></i>
+                    <span>Deporte Universitario Flexible</span>
+                </div>
+                <h1 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4">
+                    ¡Volvamos a jugar! <br>
+                    <span class="bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-400 bg-clip-text text-transparent">Canchas y compañeros a tu alcance</span>
+                </h1>
+                <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+                    Organiza partidos en la universidad ajustados a tus horarios de clase cambiantes. Sin complicaciones ni pérdidas de tiempo.
+                </p>
+            </div>
+        </div>
+
+        <!-- APP MAIN VIEW -->
+        <div id="viewApp" class="space-y-8">
+            
+            <!-- Step Indicator Bar -->
+            <div class="glass-panel p-4 rounded-2xl">
+                <div class="grid grid-cols-5 gap-2 text-center text-xs font-semibold">
+                    <div id="stepTab1" class="p-2.5 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 transition-all cursor-pointer font-bold" onclick="goToStep(1)">
+                        <span class="block text-lg">1</span>
+                        <span class="hidden md:inline">Deporte</span>
+                    </div>
+                    <div id="stepTab2" class="p-2.5 rounded-xl bg-slate-800/60 text-slate-400 border border-slate-700/50 transition-all cursor-pointer" onclick="goToStep(2)">
+                        <span class="block text-lg">2</span>
+                        <span class="hidden md:inline">Mis Horarios</span>
+                    </div>
+                    <div id="stepTab3" class="p-2.5 rounded-xl bg-slate-800/60 text-slate-400 border border-slate-700/50 transition-all cursor-pointer" onclick="goToStep(3)">
+                        <span class="block text-lg">3</span>
+                        <span class="hidden md:inline">Opciones</span>
+                    </div>
+                    <div id="stepTab4" class="p-2.5 rounded-xl bg-slate-800/60 text-slate-400 border border-slate-700/50 transition-all cursor-pointer" onclick="goToStep(4)">
+                        <span class="block text-lg">4</span>
+                        <span class="hidden md:inline">Compañeros</span>
+                    </div>
+                    <div id="stepTab5" class="p-2.5 rounded-xl bg-slate-800/60 text-slate-400 border border-slate-700/50 transition-all cursor-pointer" onclick="goToStep(5)">
+                        <span class="block text-lg">5</span>
+                        <span class="hidden md:inline">Confirmar</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 1: DEPORTE WITH VISUAL CARDS -->
+            <div id="step1Container" class="glass-panel p-6 sm:p-8 rounded-3xl space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div>
+                        <span class="text-cyan-400 text-xs font-bold uppercase tracking-wider">Paso 1 de 5</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">¿Qué deporte quieres practicar esta semana?</h2>
+                    </div>
+                    <i class="fa-solid fa-trophy text-2xl text-amber-400"></i>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <!-- Fútbol -->
+                    <button onclick="selectSport('Fútbol')" id="sportFutbol" class="sport-btn relative h-56 rounded-2xl overflow-hidden border-2 border-slate-700/80 group hover:border-cyan-400 transition-all text-left shadow-lg">
+                        <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style="background-image: url('https://images.unsplash.com/photo-1517927033932-b3d18e61fb3a?q=80&w=600&auto=format&fit=crop');"></div>
+                        <div class="absolute inset-0 sport-card-overlay"></div>
+                        <div class="relative h-full p-5 flex flex-col justify-between z-10">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-500/20 backdrop-blur-md border border-cyan-400/30 text-cyan-400 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-futbol"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white group-hover:text-cyan-300">Fútbol / Fútsal</h3>
+                                <p class="text-xs text-slate-300 mt-1">Canchas sintéticas y losas del campus</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Básquet -->
+                    <button onclick="selectSport('Básquet')" id="sportBasquet" class="sport-btn relative h-56 rounded-2xl overflow-hidden border-2 border-slate-700/80 group hover:border-amber-400 transition-all text-left shadow-lg">
+                        <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style="background-image: url('https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=600&auto=format&fit=crop');"></div>
+                        <div class="absolute inset-0 sport-card-overlay"></div>
+                        <div class="relative h-full p-5 flex flex-col justify-between z-10">
+                            <div class="w-10 h-10 rounded-xl bg-amber-500/20 backdrop-blur-md border border-amber-400/30 text-amber-400 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-basketball"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white group-hover:text-amber-300">Básquetball</h3>
+                                <p class="text-xs text-slate-300 mt-1">Coliseo universitario y tercias</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Vóley -->
+                    <button onclick="selectSport('Vóley')" id="sportVoley" class="sport-btn relative h-56 rounded-2xl overflow-hidden border-2 border-slate-700/80 group hover:border-emerald-400 transition-all text-left shadow-lg">
+                        <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style="background-image: url('https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?q=80&w=600&auto=format&fit=crop');"></div>
+                        <div class="absolute inset-0 sport-card-overlay"></div>
+                        <div class="relative h-full p-5 flex flex-col justify-between z-10">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 backdrop-blur-md border border-emerald-400/30 text-emerald-400 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-volleyball"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white group-hover:text-emerald-300">Vóley Mixto</h3>
+                                <p class="text-xs text-slate-300 mt-1">Partidos recreativos e inter-facultades</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <!-- Tenis -->
+                    <button onclick="selectSport('Tenis')" id="sportTenis" class="sport-btn relative h-56 rounded-2xl overflow-hidden border-2 border-slate-700/80 group hover:border-rose-400 transition-all text-left shadow-lg">
+                        <div class="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style="background-image: url('https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?q=80&w=600&auto=format&fit=crop');"></div>
+                        <div class="absolute inset-0 sport-card-overlay"></div>
+                        <div class="relative h-full p-5 flex flex-col justify-between z-10">
+                            <div class="w-10 h-10 rounded-xl bg-rose-500/20 backdrop-blur-md border border-rose-400/30 text-rose-400 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-table-tennis-paddle-ball"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white group-hover:text-rose-300">Tenis / Padel</h3>
+                                <p class="text-xs text-slate-300 mt-1">Modalidad singles y dobles</p>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="flex justify-end pt-4">
+                    <button id="btnStep1Next" onclick="goToStep(2)" class="px-6 py-3 rounded-xl bg-slate-800 text-slate-500 font-bold cursor-not-allowed transition-all flex items-center space-x-2" disabled>
+                        <span>Siguiente: Mis Horarios</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 2: HORARIOS LIBRES -->
+            <div id="step2Container" class="glass-panel p-6 sm:p-8 rounded-3xl space-y-6 hidden">
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-900/40 via-cyan-900/30 to-slate-900/80 p-5 border border-cyan-500/30">
+                    <div class="absolute inset-0 z-0 opacity-20 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1519766304817-4f37bda74a29?q=80&w=1000&auto=format&fit=crop');"></div>
+                    <div class="relative z-10 flex items-center justify-between">
+                        <div>
+                            <span class="text-cyan-400 text-xs font-bold uppercase tracking-wider bg-cyan-950/80 px-2.5 py-1 rounded-full border border-cyan-500/40">Paso 2 de 5</span>
+                            <h2 class="text-xl sm:text-2xl font-extrabold text-white mt-2">Marca tus huecos libres entre clases</h2>
+                            <p class="text-xs text-slate-300 mt-1">Transforma tu tiempo muerto universitario en momentos de deporte e integración.</p>
+                        </div>
+                        <div class="hidden sm:flex w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 border border-cyan-400/30 items-center justify-center text-2xl shadow-lg">
+                            <i class="fa-regular fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <button onclick="toggleTimeSlot('Lun 4 a 6 p. m.', this)" class="timeslot-btn p-4 rounded-2xl border border-slate-700 bg-slate-900/80 hover:bg-slate-800/90 hover:border-cyan-400 transition-all flex items-center justify-between group shadow-md">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center font-bold text-sm group-hover:bg-cyan-500/20">LUN</div>
+                            <div class="text-left">
+                                <p class="text-sm font-semibold text-white">Lunes</p>
+                                <p class="text-xs text-cyan-400 font-mono">4:00 - 6:00 p. m.</p>
+                            </div>
+                        </div>
+                        <i class="slot-check fa-regular fa-circle text-slate-500 text-xl"></i>
+                    </button>
+
+                    <button onclick="toggleTimeSlot('Mar 12 a 2 p. m.', this)" class="timeslot-btn p-4 rounded-2xl border border-slate-700 bg-slate-900/80 hover:bg-slate-800/90 hover:border-cyan-400 transition-all flex items-center justify-between group shadow-md">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center font-bold text-sm group-hover:bg-cyan-500/20">MAR</div>
+                            <div class="text-left">
+                                <p class="text-sm font-semibold text-white">Martes</p>
+                                <p class="text-xs text-cyan-400 font-mono">12:00 - 2:00 p. m.</p>
+                            </div>
+                        </div>
+                        <i class="slot-check fa-regular fa-circle text-slate-500 text-xl"></i>
+                    </button>
+
+                    <button onclick="toggleTimeSlot('Mié 4 a 6 p. m.', this)" class="timeslot-btn p-4 rounded-2xl border border-slate-700 bg-slate-900/80 hover:bg-slate-800/90 hover:border-cyan-400 transition-all flex items-center justify-between group shadow-md">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center font-bold text-sm group-hover:bg-cyan-500/20">MIÉ</div>
+                            <div class="text-left">
+                                <p class="text-sm font-semibold text-white">Miércoles</p>
+                                <p class="text-xs text-cyan-400 font-mono">4:00 - 6:00 p. m.</p>
+                            </div>
+                        </div>
+                        <i class="slot-check fa-regular fa-circle text-slate-500 text-xl"></i>
+                    </button>
+
+                    <button onclick="toggleTimeSlot('Jue 2 a 4 p. m.', this)" class="timeslot-btn p-4 rounded-2xl border border-slate-700 bg-slate-900/80 hover:bg-slate-800/90 hover:border-cyan-400 transition-all flex items-center justify-between group shadow-md">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center font-bold text-sm group-hover:bg-cyan-500/20">JUE</div>
+                            <div class="text-left">
+                                <p class="text-sm font-semibold text-white">Jueves</p>
+                                <p class="text-xs text-cyan-400 font-mono">2:00 - 4:00 p. m.</p>
+                            </div>
+                        </div>
+                        <i class="slot-check fa-regular fa-circle text-slate-500 text-xl"></i>
+                    </button>
+
+                    <button onclick="toggleTimeSlot('Vie 4 a 6 p. m.', this)" class="timeslot-btn p-4 rounded-2xl border border-slate-700 bg-slate-900/80 hover:bg-slate-800/90 hover:border-cyan-400 transition-all flex items-center justify-between group shadow-md">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center font-bold text-sm group-hover:bg-cyan-500/20">VIE</div>
+                            <div class="text-left">
+                                <p class="text-sm font-semibold text-white">Viernes</p>
+                                <p class="text-xs text-cyan-400 font-mono">4:00 - 6:00 p. m.</p>
+                            </div>
+                        </div>
+                        <i class="slot-check fa-regular fa-circle text-slate-500 text-xl"></i>
+                    </button>
+
+                    <button onclick="toggleTimeSlot('Sáb 10 a 12 a. m.', this)" class="timeslot-btn p-4 rounded-2xl border border-slate-700 bg-slate-900/80 hover:bg-slate-800/90 hover:border-cyan-400 transition-all flex items-center justify-between group shadow-md">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center font-bold text-sm group-hover:bg-cyan-500/20">SÁB</div>
+                            <div class="text-left">
+                                <p class="text-sm font-semibold text-white">Sábado</p>
+                                <p class="text-xs text-cyan-400 font-mono">10:00 - 12:00 a. m.</p>
+                            </div>
+                        </div>
+                        <i class="slot-check fa-regular fa-circle text-slate-500 text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Custom time slot adder -->
+                <div class="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div class="flex items-center space-x-2 w-full sm:w-auto">
+                        <i class="fa-solid fa-plus-circle text-cyan-400"></i>
+                        <span class="text-xs font-medium text-slate-300">¿Otro horario libre?</span>
+                    </div>
+                    <div class="flex items-center space-x-2 w-full sm:w-auto">
+                        <input type="text" id="customSlotInput" placeholder="Ej: Lun 8 - 10 a.m." class="px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 w-full sm:w-48">
+                        <button onclick="addCustomTimeSlot()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-cyan-500/30 text-xs font-semibold whitespace-nowrap">Añadir</button>
+                    </div>
+                </div>
+
+                <!-- Selected slots summary bar -->
+                <div id="selectedSlotsSummary" class="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-800/40 flex items-center justify-between">
+                    <div class="text-xs">
+                        <span class="text-slate-400">Horarios seleccionados:</span>
+                        <div id="selectedSlotsList" class="flex flex-wrap gap-2 mt-1">
+                            <span class="text-slate-500 italic">Ningún horario marcado aún</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between pt-4">
+                    <button onclick="goToStep(1)" class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition-all">Atrás</button>
+                    <button id="btnStep2Next" onclick="goToStep(3)" class="px-6 py-3 rounded-xl bg-slate-800 text-slate-500 font-bold cursor-not-allowed transition-all flex items-center space-x-2" disabled>
+                        <span>Buscar Canchas y Partidos</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 3: REVISAR OPCIONES Y COINCIDENCIAS -->
+            <div id="step3Container" class="glass-panel p-6 sm:p-8 rounded-3xl space-y-6 hidden">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 pb-4 gap-2">
+                    <div>
+                        <span class="text-cyan-400 text-xs font-bold uppercase tracking-wider">Paso 3 de 5</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">Coincidencias Encontradas</h2>
+                        <p class="text-xs text-slate-400 mt-1">Basado en tu deporte (<span id="summarySelectedSport" class="text-cyan-400 font-semibold">-</span>) y tus horarios.</p>
+                    </div>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
+                        Disponibilidad Activa
+                    </span>
+                </div>
+
+                <div id="matchesList" class="space-y-4">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <div class="flex justify-between pt-4 border-t border-slate-800">
+                    <button onclick="goToStep(2)" class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition-all">Atrás</button>
+                    <button onclick="goToStep(4)" class="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold transition-all shadow-lg shadow-cyan-500/20 flex items-center space-x-2">
+                        <span>Ver Lista de Compañeros</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 4: BUSCAR COMPAÑEROS -->
+            <div id="step4Container" class="glass-panel p-6 sm:p-8 rounded-3xl space-y-6 hidden">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div>
+                        <span class="text-cyan-400 text-xs font-bold uppercase tracking-wider">Paso 4 de 5</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">Compañeros e Interesados</h2>
+                        <p class="text-xs text-slate-400 mt-1">Estudiantes universitarios que coinciden en tus horas libres.</p>
+                    </div>
+                    <i class="fa-solid fa-users text-2xl text-blue-400"></i>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="teammatesList">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <div class="flex justify-between pt-4 border-t border-slate-800">
+                    <button onclick="goToStep(3)" class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition-all">Atrás</button>
+                    <button onclick="goToStep(5)" class="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold transition-all shadow-lg shadow-emerald-500/20 flex items-center space-x-2">
+                        <span>Ir a Confirmación Final</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 5: CONFIRMACIÓN Y REGISTRO -->
+            <div id="step5Container" class="glass-panel p-6 sm:p-8 rounded-3xl space-y-6 hidden">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div>
+                        <span class="text-cyan-400 text-xs font-bold uppercase tracking-wider">Paso 5 de 5</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-white">Confirmar Reserva de MVP</h2>
+                        <p class="text-xs text-slate-400 mt-1">El equipo de CampusPlay coordinará la cancha y grupo de juego.</p>
+                    </div>
+                    <i class="fa-solid fa-circle-check text-2xl text-emerald-400"></i>
+                </div>
+
+                <div class="bg-slate-950/90 border border-slate-800 p-6 rounded-2xl space-y-4">
+                    <h3 class="text-sm font-bold text-slate-300 uppercase tracking-wider">Resumen de Tu Solicitud</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Deporte:</span>
+                            <span id="summarySportVal" class="font-bold text-cyan-400">-</span>
+                        </div>
+                        <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Horarios Marcados:</span>
+                            <span id="summarySlotsVal" class="font-bold text-white">-</span>
+                        </div>
+                        <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800">
+                            <span class="text-xs text-slate-400 block">Partido Seleccionado:</span>
+                            <span id="summaryMatchVal" class="font-bold text-emerald-400">General / Libre</span>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="registrationForm" onsubmit="handleFinalSubmit(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Nombre Completo *</label>
+                            <input type="text" id="regName" required placeholder="Ej: Carlos Mendoza" class="w-full px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Código Universitario / Carrera *</label>
+                            <input type="text" id="regCareer" required placeholder="Ej: 20211045 - Ingeniería" class="w-full px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Teléfono / WhatsApp *</label>
+                            <input type="tel" id="regPhone" required placeholder="Ej: 987654321" class="w-full px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Preferencia de Cancha / Sede</label>
+                            <select id="regLocation" class="w-full px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700 text-sm text-white focus:outline-none focus:border-cyan-500">
+                                <option value="Cancha Central del Campus">Cancha Central del Campus</option>
+                                <option value="Coliseo Polideportivo">Coliseo Polideportivo</option>
+                                <option value="Cancha Externa Convenio">Cancha Externa Convenio</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start space-x-3">
+                        <i class="fa-solid fa-lock mt-0.5 text-amber-400"></i>
+                        <span><strong>Privacidad garantizada:</strong> Tus datos de registro solo son visibles para el administrador de CampusPlay para coordinar la cancha.</span>
+                    </div>
+
+                    <div class="flex justify-between pt-4 border-t border-slate-800">
+                        <button type="button" onclick="goToStep(4)" class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition-all">Atrás</button>
+                        <button type="submit" class="px-8 py-3 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-extrabold transition-all shadow-xl shadow-emerald-500/20 flex items-center space-x-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Confirmar Participación</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- MY REGISTRATIONS VIEW (PRIVACY PROTECTED) -->
+        <div id="viewMyMatches" class="space-y-6 hidden">
+            <div class="glass-panel p-6 sm:p-8 rounded-3xl space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-white flex items-center space-x-2">
+                            <i class="fa-solid fa-user-shield text-cyan-400"></i>
+                            <span>Panel Privado de Registros Guardados</span>
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-1">Acceso privado exclusivo para el administrador de CampusPlay.</p>
+                    </div>
+                    <button onclick="switchView('app')" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 text-xs font-semibold">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Volver a la App
+                    </button>
+                </div>
+
+                <div id="myRegistrationsContainer" class="space-y-4">
+                    <!-- Dynamic rendering -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- PIN SECURITY / ADMIN AUTH MODAL -->
+    <div id="adminAuthModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-sm p-6 rounded-3xl border border-cyan-500/30 text-center space-y-4 shadow-2xl">
+            <div class="w-14 h-14 rounded-2xl bg-cyan-500/20 text-cyan-400 mx-auto flex items-center justify-center text-2xl border border-cyan-500/40">
+                <i class="fa-solid fa-user-lock"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-white">Acceso Administrador</h3>
+                <p class="text-xs text-slate-400">Introduce el PIN para revisar los registros acumulados de los usuarios o la matriz de prueba.</p>
+            </div>
+
+            <form onsubmit="verifyAdminPin(event)" class="space-y-3">
+                <input type="password" id="adminPinInput" maxlength="6" required placeholder="Ingresa PIN (ej: 1234)" class="w-full text-center tracking-widest text-lg font-bold px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-cyan-400 placeholder-slate-600 focus:outline-none focus:border-cyan-500">
+                <p id="pinErrorMsg" class="text-xs text-rose-400 hidden">PIN incorrecto. Intenta nuevamente </p>
+                <div class="flex space-x-2 pt-2">
+                    <button type="button" onclick="closeAdminAuthModal()" class="w-1/2 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Cancelar</button>
+                    <button type="submit" class="w-1/2 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold">Ingresar</button>
+                </div>
+            </form>
+            
+        </div>
+    </div>
+
+    <!-- TESTER & MVP VALIDATION PANEL MODAL -->
+    <div id="testerModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-4xl max-h-[90vh] rounded-3xl border border-slate-700 shadow-2xl flex flex-col overflow-hidden">
+            
+            <div class="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-950/80">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-flask"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Panel Privado de Validación MVP (Diapositiva 10)</h3>
+                        <p class="text-xs text-slate-400">Registro de pruebas con estudiantes universitarios en tiempo real</p>
+                    </div>
+                </div>
+                <button onclick="closeTesterModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-6 flex-grow">
+                
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-center">
+                        <span class="text-xs text-slate-400 block">Total Pruebas</span>
+                        <span id="kpiTotalTests" class="text-xl font-bold text-white">0</span>
+                    </div>
+                    <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-center">
+                        <span class="text-xs text-slate-400 block">Entendimiento</span>
+                        <span id="kpiUnderstanding" class="text-xl font-bold text-cyan-400">0%</span>
+                    </div>
+                    <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-center">
+                        <span class="text-xs text-slate-400 block">Interés Real</span>
+                        <span id="kpiInterest" class="text-xl font-bold text-emerald-400">0%</span>
+                    </div>
+                    <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 text-center">
+                        <span class="text-xs text-slate-400 block">Jugarían Esta Semana</span>
+                        <span id="kpiConversion" class="text-xl font-bold text-amber-400">0%</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-4">
+                    <h4 class="text-sm font-bold text-cyan-400 flex items-center space-x-2">
+                        <i class="fa-solid fa-plus-circle"></i>
+                        <span>Registrar Nueva Prueba con Estudiante</span>
+                    </h4>
+                    
+                    <form id="testLogForm" onsubmit="handleTestLogSubmit(event)" class="space-y-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <input type="text" id="testStudentName" required placeholder="Nombre del Estudiante (Ej: Usuario 1)" class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-500">
+                            <input type="text" id="testCareer" placeholder="Carrera / Universidad" class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                            <label class="flex items-center space-x-2 p-2 bg-slate-900 rounded-xl cursor-pointer border border-slate-800">
+                                <input type="checkbox" id="testUnderstood" class="rounded bg-slate-800 border-slate-600 text-cyan-500">
+                                <span>¿Entendió la app?</span>
+                            </label>
+                            <label class="flex items-center space-x-2 p-2 bg-slate-900 rounded-xl cursor-pointer border border-slate-800">
+                                <input type="checkbox" id="testFoundOption" class="rounded bg-slate-800 border-slate-600 text-cyan-500">
+                                <span>¿Encontró opción?</span>
+                            </label>
+                            <label class="flex items-center space-x-2 p-2 bg-slate-900 rounded-xl cursor-pointer border border-slate-800">
+                                <input type="checkbox" id="testShowedInterest" class="rounded bg-slate-800 border-slate-600 text-cyan-500">
+                                <span>¿Mostró interés?</span>
+                            </label>
+                            <label class="flex items-center space-x-2 p-2 bg-slate-900 rounded-xl cursor-pointer border border-slate-800">
+                                <input type="checkbox" id="testWouldPlay" class="rounded bg-slate-800 border-slate-600 text-cyan-500">
+                                <span>¿Jugaría esta semana?</span>
+                            </label>
+                        </div>
+
+                        <input type="text" id="testComment" placeholder="Duda o comentario textual del usuario" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-500">
+
+                        <button type="submit" class="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition-all">
+                            Guardar Evaluación en la Tabla
+                        </button>
+                    </form>
+                </div>
+
+                <div class="space-y-2">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Matriz de Resultados del MVP</h4>
+                    <div class="overflow-x-auto rounded-2xl border border-slate-800">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-900 text-slate-400 uppercase font-mono">
+                                <tr>
+                                    <th class="p-3">Usuario</th>
+                                    <th class="p-3">Entendió</th>
+                                    <th class="p-3">Opción</th>
+                                    <th class="p-3">Interés</th>
+                                    <th class="p-3">Jugaría</th>
+                                    <th class="p-3">Comentarios</th>
+                                </tr>
+                            </thead>
+                            <tbody id="testResultsTableBody" class="divide-y divide-slate-800/60 bg-slate-950/60">
+                                <!-- Dynamic rendering -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="p-4 border-t border-slate-800 bg-slate-950/80 flex justify-between items-center">
+                <button onclick="clearTestData()" class="text-xs text-rose-400 hover:underline">Reiniciar Datos de Prueba</button>
+                <div class="flex space-x-2">
+                    <button onclick="exportTestJSON()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-200">Exportar JSON</button>
+                    <button onclick="closeTesterModal()" class="px-4 py-1.5 rounded-xl bg-cyan-500 text-slate-950 text-xs font-bold">Cerrar</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SUCCESS NOTIFICATION MODAL -->
+    <div id="successModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-md p-6 rounded-3xl border border-emerald-500/40 shadow-2xl text-center space-y-4">
+            <div class="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center text-3xl">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white">¡Solicitud Guardada!</h3>
+            <p class="text-xs text-slate-300 leading-relaxed" id="successModalMsg">
+                Tu interés y horario han sido registrados con éxito.
+            </p>
+            <button onclick="closeSuccessModal()" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-extrabold text-sm shadow-lg shadow-emerald-500/20">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ADMIN AUTH STATE
+        let pendingAdminAction = null;
+        const ADMIN_PIN = "1234"; // Default admin password PIN
+
+        function requestAdminAuth(actionType) {
+            pendingAdminAction = actionType;
+            document.getElementById('adminPinInput').value = '';
+            document.getElementById('pinErrorMsg').classList.add('hidden');
+            document.getElementById('adminAuthModal').classList.remove('hidden');
+        }
+
+        function closeAdminAuthModal() {
+            document.getElementById('adminAuthModal').classList.add('hidden');
+            pendingAdminAction = null;
+        }
+
+        function verifyAdminPin(e) {
+            e.preventDefault();
+            const pin = document.getElementById('adminPinInput').value.trim();
+            if (pin === ADMIN_PIN) {
+                const action = pendingAdminAction;
+                closeAdminAuthModal();
+                
+                setTimeout(() => {
+                    if (action === 'test') {
+                        openTesterModal();
+                    } else if (action === 'registrations') {
+                        switchView('myMatches');
+                    }
+                }, 100);
+            } else {
+                document.getElementById('pinErrorMsg').classList.remove('hidden');
+            }
+        }
+
+        // Overwrite closeSuccessModal to go back to app flow
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.add('hidden');
+            switchView('app');
+        }
+
+        // ==========================================
+        // APP STATE & INTERACTION LOGIC
+        // ==========================================
+
+        let appState = {
+            currentStep: 1,
+            selectedSport: '',
+            selectedSlots: [],
+            selectedMatch: null
+        };
+
+        // Storage helpers
+        function getRegistrations() {
+            return JSON.parse(localStorage.getItem('campusplay_registrations') || '[]');
+        }
+
+        function saveRegistration(data) {
+            const list = getRegistrations();
+            list.push(data);
+            localStorage.setItem('campusplay_registrations', JSON.stringify(list));
+            updateCounters();
+        }
+
+        function getTestLogs() {
+            return JSON.parse(localStorage.getItem('campusplay_test_logs') || '[]');
+        }
+
+        function saveTestLog(data) {
+            const list = getTestLogs();
+            list.push(data);
+            localStorage.setItem('campusplay_test_logs', JSON.stringify(list));
+            updateCounters();
+            renderTestMatrix();
+        }
+
+        function updateCounters() {
+            const regs = getRegistrations();
+            const tests = getTestLogs();
+            document.getElementById('userRegistrationsCount').innerText = regs.length;
+            document.getElementById('testCounterBadge').innerText = tests.length;
+        }
+
+        // Navigation
+        function switchView(viewName) {
+            const appView = document.getElementById('viewApp');
+            const myMatchesView = document.getElementById('viewMyMatches');
+
+            if (viewName === 'app') {
+                appView.classList.remove('hidden');
+                myMatchesView.classList.add('hidden');
+            } else if (viewName === 'myMatches') {
+                appView.classList.add('hidden');
+                myMatchesView.classList.remove('hidden');
+                renderRegistrations();
+            }
+        }
+
+        function goToStep(stepNumber) {
+            appState.currentStep = stepNumber;
+
+            // Update step tab indicators
+            for (let i = 1; i <= 5; i++) {
+                const tab = document.getElementById(`stepTab${i}`);
+                const container = document.getElementById(`step${i}Container`);
+                
+                if (container) {
+                    if (i === stepNumber) {
+                        container.classList.remove('hidden');
+                    } else {
+                        container.classList.add('hidden');
+                    }
+                }
+
+                if (tab) {
+                    if (i === stepNumber) {
+                        tab.className = "p-2.5 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 font-bold transition-all cursor-pointer";
+                    } else if (i < stepNumber) {
+                        tab.className = "p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-semibold transition-all cursor-pointer";
+                    } else {
+                        tab.className = "p-2.5 rounded-xl bg-slate-800/60 text-slate-400 border border-slate-700/50 transition-all cursor-pointer";
+                    }
+                }
+            }
+
+            if (stepNumber === 3) {
+                renderMatches();
+            } else if (stepNumber === 4) {
+                renderTeammates();
+            } else if (stepNumber === 5) {
+                renderSummary();
+            }
+        }
+
+        // Step 1: Select Sport
+        function selectSport(sportName) {
+            appState.selectedSport = sportName;
+            
+            // Visual highlight on sport cards
+            document.querySelectorAll('.sport-btn').forEach(btn => {
+                btn.classList.remove('ring-4', 'ring-cyan-400', 'border-cyan-400');
+            });
+
+            const selectedBtnId = `sport${sportName.replace(' / Fútsal', '').replace('ball', '').replace(' Mixto', '').replace(' / Padel', '')}`;
+            const selectedBtn = document.getElementById(selectedBtnId);
+            if (selectedBtn) {
+                selectedBtn.classList.add('ring-4', 'ring-cyan-400', 'border-cyan-400');
+            }
+
+            // Enable next button
+            const nextBtn = document.getElementById('btnStep1Next');
+            nextBtn.disabled = false;
+            nextBtn.className = "px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold transition-all shadow-lg shadow-cyan-500/20 flex items-center space-x-2 cursor-pointer";
+        }
+
+        // Step 2: Time Slots
+        function toggleTimeSlot(slotText, element) {
+            const checkIcon = element.querySelector('.slot-check');
+            const index = appState.selectedSlots.indexOf(slotText);
+
+            if (index > -1) {
+                appState.selectedSlots.splice(index, 1);
+                element.classList.remove('border-cyan-500', 'bg-cyan-950/40');
+                element.classList.add('border-slate-700', 'bg-slate-900/60');
+                if (checkIcon) {
+                    checkIcon.className = "slot-check fa-regular fa-circle text-slate-500 text-xl";
+                }
+            } else {
+                appState.selectedSlots.push(slotText);
+                element.classList.remove('border-slate-700', 'bg-slate-900/60');
+                element.classList.add('border-cyan-500', 'bg-cyan-950/40');
+                if (checkIcon) {
+                    checkIcon.className = "slot-check fa-solid fa-circle-check text-cyan-400 text-xl";
+                }
+            }
+
+            updateSlotSummary();
+        }
+
+        function addCustomTimeSlot() {
+            const input = document.getElementById('customSlotInput');
+            const val = input.value.trim();
+            if (val) {
+                if (!appState.selectedSlots.includes(val)) {
+                    appState.selectedSlots.push(val);
+                }
+                input.value = '';
+                updateSlotSummary();
+            }
+        }
+
+        function updateSlotSummary() {
+            const listEl = document.getElementById('selectedSlotsList');
+            const nextBtn = document.getElementById('btnStep2Next');
+
+            if (appState.selectedSlots.length === 0) {
+                listEl.innerHTML = `<span class="text-slate-500 italic">Ningún horario marcado aún</span>`;
+                nextBtn.disabled = true;
+                nextBtn.className = "px-6 py-3 rounded-xl bg-slate-800 text-slate-500 font-bold cursor-not-allowed transition-all flex items-center space-x-2";
+            } else {
+                listEl.innerHTML = appState.selectedSlots.map(slot => `
+                    <span class="inline-flex items-center space-x-1 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-2.5 py-1 rounded-lg text-xs font-mono">
+                        <span>${slot}</span>
+                        <i class="fa-solid fa-xmark text-cyan-400 hover:text-white cursor-pointer ml-1" onclick="removeSlot('${slot}')"></i>
+                    </span>
+                `).join('');
+
+                nextBtn.disabled = false;
+                nextBtn.className = "px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold transition-all shadow-lg shadow-cyan-500/20 flex items-center space-x-2 cursor-pointer";
+            }
+        }
+
+        function removeSlot(slotText) {
+            const index = appState.selectedSlots.indexOf(slotText);
+            if (index > -1) {
+                appState.selectedSlots.splice(index, 1);
+                updateSlotSummary();
+            }
+        }
+
+        // Step 3: Dynamic Matches Rendering
+        function renderMatches() {
+            document.getElementById('summarySelectedSport').innerText = appState.selectedSport || 'Cualquiera';
+            const container = document.getElementById('matchesList');
+
+            const sampleMatches = [
+                { id: 1, title: `Partido de ${appState.selectedSport || 'Fútbol'}`, time: appState.selectedSlots[0] || 'Lunes 4:30 p. m.', interested: '6 personas interesadas', court: 'Cancha Central - Sintética', status: 'Buscando participantes' },
+                { id: 2, title: `Reto Universitario de ${appState.selectedSport || 'Deporte'}`, time: appState.selectedSlots[1] || 'Miércoles 5:00 p. m.', interested: '4 personas interesadas', court: 'Polideportivo Piso 2', status: 'Cancha por confirmar' },
+                { id: 3, title: `Entrenamiento Libre`, time: 'Viernes 4:00 p. m.', interested: '8 personas interesadas', court: 'Losa Deportiva 3', status: 'Casi Completo' }
+            ];
+
+            container.innerHTML = sampleMatches.map(m => `
+                <div class="p-5 rounded-2xl border border-slate-700/80 bg-slate-900/80 hover:border-cyan-500/60 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 font-semibold border border-cyan-500/30">${m.status}</span>
+                            <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${m.time}</span>
+                        </div>
+                        <h4 class="text-lg font-bold text-white">${m.title}</h4>
+                        <div class="flex items-center space-x-4 text-xs text-slate-300 pt-1">
+                            <span><i class="fa-solid fa-location-dot text-rose-400 mr-1"></i>${m.court}</span>
+                            <span><i class="fa-solid fa-users text-cyan-400 mr-1"></i>${m.interested}</span>
+                        </div>
+                    </div>
+                    <button onclick="selectMatch('${m.title} - ${m.time}')" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs transition-all shadow-md">
+                        Me Interesa Unirme
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function selectMatch(matchInfo) {
+            appState.selectedMatch = matchInfo;
+            goToStep(4);
+        }
+
+        // Step 4: Teammates Rendering
+        function renderTeammates() {
+            const container = document.getElementById('teammatesList');
+            const teammates = [
+                { name: 'Mateo R.', career: 'Ingeniería Civil - 6to ciclo', times: appState.selectedSlots[0] || 'Lun / Mié 4-6 pm', level: 'Intermedio' },
+                { name: 'Andrea M.', career: 'Administración - 4to ciclo', times: 'Mar / Jue 12-2 pm', level: 'Recreativo' },
+                { name: 'Sebastian G.', career: 'Derecho - 8vo ciclo', times: 'Vie 4-6 pm', level: 'Avanzado' },
+                { name: 'Valeria C.', career: 'Medicina - 5to ciclo', times: 'Sáb 10-12 am', level: 'Recreativo' }
+            ];
+
+            container.innerHTML = teammates.map(t => `
+                <div class="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-white text-lg">
+                        ${t.name.charAt(0)}
+                    </div>
+                    <div class="flex-grow">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-sm font-bold text-white">${t.name}</h4>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-cyan-300 border border-slate-700">${t.level}</span>
+                        </div>
+                        <p class="text-xs text-slate-400">${t.career}</p>
+                        <p class="text-[11px] text-emerald-400 mt-1"><i class="fa-regular fa-clock mr-1"></i>${t.times}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Step 5: Summary
+        function renderSummary() {
+            document.getElementById('summarySportVal').innerText = appState.selectedSport || 'No especificado';
+            document.getElementById('summarySlotsVal').innerText = appState.selectedSlots.join(', ') || 'Sin horario seleccionado';
+            document.getElementById('summaryMatchVal').innerText = appState.selectedMatch || 'Inscripción General';
+        }
+
+        // Form Submit
+        function handleFinalSubmit(e) {
+            e.preventDefault();
+            const data = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleString(),
+                name: document.getElementById('regName').value,
+                career: document.getElementById('regCareer').value,
+                phone: document.getElementById('regPhone').value,
+                location: document.getElementById('regLocation').value,
+                sport: appState.selectedSport,
+                slots: appState.selectedSlots,
+                match: appState.selectedMatch || 'General'
+            };
+
+            saveRegistration(data);
+            
+            document.getElementById('successModalMsg').innerHTML = `
+                ¡Gracias <strong>${data.name}</strong>! Hemos registrado tu interés para <strong>${data.sport}</strong>.
+                Te contactaremos al <strong>${data.phone}</strong> para coordinar la cancha.
+            `;
+            document.getElementById('successModal').classList.remove('hidden');
+
+            // Reset form
+            document.getElementById('registrationForm').reset();
+            appState.selectedSlots = [];
+            appState.selectedSport = '';
+            appState.selectedMatch = null;
+            updateSlotSummary();
+        }
+
+        // Render Registrations in Admin Panel
+        function renderRegistrations() {
+            const container = document.getElementById('myRegistrationsContainer');
+            const registrations = getRegistrations();
+
+            if (!registrations || registrations.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-slate-400 bg-slate-950/60 rounded-2xl border border-slate-800">
+                        <i class="fa-solid fa-inbox text-4xl mb-3 text-slate-600"></i>
+                        <p class="text-base font-semibold text-slate-300">Aún no hay registros guardados.</p>
+                        <p class="text-xs text-slate-500 mt-1">Completa el formulario en el Paso 5 para registrar al primer participante.</p>
+                        <button onclick="switchView('app')" class="mt-4 px-4 py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs">
+                            Ir a Registrar Estudiante
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = registrations.map(r => `
+                <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 shadow-lg">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-base font-bold text-white">${r.name || 'Estudiante'}</h4>
+                                <p class="text-xs text-slate-400">${r.career || 'Sin información'} • <span class="text-cyan-400 font-mono">${r.phone || ''}</span></p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] text-slate-400 font-mono bg-slate-950 px-2 py-1 rounded-md border border-slate-800">${r.timestamp || ''}</span>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                        <div class="p-2 rounded-lg bg-slate-950 text-slate-300">
+                            <span class="text-slate-500 block text-[10px]">Deporte:</span>
+                            <span class="font-bold text-cyan-400">${r.sport || '-'}</span>
+                        </div>
+                        <div class="p-2 rounded-lg bg-slate-950 text-slate-300">
+                            <span class="text-slate-500 block text-[10px]">Cancha / Sede:</span>
+                            <span class="font-bold text-white">${r.location || '-'}</span>
+                        </div>
+                        <div class="p-2 rounded-lg bg-slate-950 text-slate-300 col-span-2 sm:col-span-1">
+                            <span class="text-slate-500 block text-[10px]">Horarios:</span>
+                            <span class="font-bold text-emerald-400">${Array.isArray(r.slots) ? r.slots.join(', ') : (r.slots || '-')}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ==========================================
+        // MVP TEST LOG LOGIC (Slide 10 Table)
+        // ==========================================
+
+        function openTesterModal() {
+            document.getElementById('testerModal').classList.remove('hidden');
+            renderTestMatrix();
+        }
+
+        function closeTesterModal() {
+            document.getElementById('testerModal').classList.add('hidden');
+        }
+
+        function handleTestLogSubmit(e) {
+            e.preventDefault();
+            const logData = {
+                id: Date.now(),
+                studentName: document.getElementById('testStudentName').value,
+                career: document.getElementById('testCareer').value,
+                understood: document.getElementById('testUnderstood').checked,
+                foundOption: document.getElementById('testFoundOption').checked,
+                showedInterest: document.getElementById('testShowedInterest').checked,
+                wouldPlay: document.getElementById('testWouldPlay').checked,
+                comment: document.getElementById('testComment').value
+            };
+
+            saveTestLog(logData);
+            document.getElementById('testLogForm').reset();
+        }
+
+        function renderTestMatrix() {
+            const logs = getTestLogs();
+            const tbody = document.getElementById('testResultsTableBody');
+
+            if (logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500 italic">No se han registrado evaluaciones de prueba aún.</td></tr>`;
+            } else {
+                tbody.innerHTML = logs.map(l => `
+                    <tr>
+                        <td class="p-3 font-semibold text-white">${l.studentName} <span class="text-[10px] text-slate-500 block">${l.career || ''}</span></td>
+                        <td class="p-3">${l.understood ? '<span class="text-emerald-400 font-bold">Sí</span>' : '<span class="text-rose-400">No</span>'}</td>
+                        <td class="p-3">${l.foundOption ? '<span class="text-emerald-400 font-bold">Sí</span>' : '<span class="text-rose-400">No</span>'}</td>
+                        <td class="p-3">${l.showedInterest ? '<span class="text-emerald-400 font-bold">Sí</span>' : '<span class="text-rose-400">No</span>'}</td>
+                        <td class="p-3">${l.wouldPlay ? '<span class="text-emerald-400 font-bold">Sí</span>' : '<span class="text-rose-400">No</span>'}</td>
+                        <td class="p-3 text-slate-400 text-[11px]">${l.comment || '-'}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // Calculate KPIs
+            const total = logs.length;
+            document.getElementById('kpiTotalTests').innerText = total;
+
+            if (total > 0) {
+                const understoodPct = Math.round((logs.filter(l => l.understood).length / total) * 100);
+                const interestPct = Math.round((logs.filter(l => l.showedInterest).length / total) * 100);
+                const conversionPct = Math.round((logs.filter(l => l.wouldPlay).length / total) * 100);
+
+                document.getElementById('kpiUnderstanding').innerText = `${understoodPct}%`;
+                document.getElementById('kpiInterest').innerText = `${interestPct}%`;
+                document.getElementById('kpiConversion').innerText = `${conversionPct}%`;
+            } else {
+                document.getElementById('kpiUnderstanding').innerText = `0%`;
+                document.getElementById('kpiInterest').innerText = `0%`;
+                document.getElementById('kpiConversion').innerText = `0%`;
+            }
+        }
+
+        function clearTestData() {
+            if (confirm('¿Estás seguro de borrar todos los registros de prueba?')) {
+                localStorage.removeItem('campusplay_test_logs');
+                updateCounters();
+                renderTestMatrix();
+            }
+        }
+
+        function exportTestJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(getTestLogs(), null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "campusplay_mvp_test_results.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            updateCounters();
+            goToStep(1);
+        };
+    </script>
+</body>
+</html>
